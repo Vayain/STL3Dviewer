@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { 
   PlayCircle, 
   PauseCircle, 
@@ -13,7 +14,8 @@ import {
   Download,
   ZoomIn,
   ZoomOut,
-  Loader2
+  Loader2,
+  Palette
 } from "lucide-react";
 import VideoRecorder from "./VideoRecorder";
 import { useSTLStore } from "../lib/stores/useSTLStore";
@@ -27,6 +29,12 @@ export default function ControlPanel() {
     setRotationSpeed,
     modelScale,
     setModelScale,
+    modelColor,
+    setModelColor,
+    modelMetalness,
+    setModelMetalness,
+    modelRoughness,
+    setModelRoughness,
     isRecording,
     stlFileName
   } = useSTLStore();
@@ -190,6 +198,94 @@ export default function ControlPanel() {
             }}
           >
             <RotateCcw className="mr-1 h-4 w-4" /> Reset All View Settings
+          </Button>
+        </TabsContent>
+        
+        <TabsContent value="material" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="color">Material Color</Label>
+            <div className="flex gap-2">
+              <Input
+                id="color"
+                type="color"
+                value={modelColor}
+                onChange={(e) => setModelColor(e.target.value)}
+                className="w-12 h-10 p-1"
+              />
+              <Input
+                type="text"
+                value={modelColor}
+                onChange={(e) => setModelColor(e.target.value)}
+                className="flex-1"
+                maxLength={7}
+                placeholder="#8294c4"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 mt-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="metalness">Metalness</Label>
+              <span className="text-xs text-muted-foreground">
+                {modelMetalness.toFixed(2)}
+              </span>
+            </div>
+            <Slider
+              id="metalness"
+              min={0}
+              max={1}
+              step={0.05}
+              value={[modelMetalness]}
+              onValueChange={(value) => setModelMetalness(value[0])}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Matte</span>
+              <span>Metallic</span>
+            </div>
+          </div>
+
+          <div className="space-y-2 mt-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="roughness">Roughness</Label>
+              <span className="text-xs text-muted-foreground">
+                {modelRoughness.toFixed(2)}
+              </span>
+            </div>
+            <Slider
+              id="roughness"
+              min={0}
+              max={1}
+              step={0.05}
+              value={[modelRoughness]}
+              onValueChange={(value) => setModelRoughness(value[0])}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Glossy</span>
+              <span>Rough</span>
+            </div>
+          </div>
+
+          <div className="bg-muted p-3 rounded-md mt-4">
+            <p className="text-sm">
+              Adjust material properties to change how light interacts with your model. 
+              Metalness affects reflectivity, while roughness controls surface texture.
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2"
+            onClick={() => {
+              setModelColor("#8294c4");
+              setModelMetalness(0.5);
+              setModelRoughness(0.5);
+              toast.success("Material reset to default");
+            }}
+          >
+            <RotateCcw className="mr-1 h-4 w-4" /> Reset Material
           </Button>
         </TabsContent>
         
