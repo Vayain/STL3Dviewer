@@ -2,12 +2,24 @@ import { useRef, useEffect } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Center, Environment, Grid } from "@react-three/drei";
 import * as THREE from "three";
+import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 
 // Component for the 3D model from STL
 function Model() {
-  const { geometry, autoRotate, rotationSpeed, isRecording } = useSTLStore();
+  const { 
+    geometry, 
+    autoRotate, 
+    rotationSpeed, 
+    isRecording, 
+    modelScale,
+    modelColor,
+    modelMetalness,
+    modelRoughness
+  } = useSTLStore();
+  
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
   // Auto-rotate the model when enabled
   useFrame(() => {
@@ -28,10 +40,17 @@ function Model() {
       
       // Position camera to see the entire model
       const maxDim = Math.max(size.x, size.y, size.z);
-      const fov = camera.fov * (Math.PI / 180);
-      const distance = (maxDim / 2) / Math.tan(fov / 2) * 1.5; // 1.5 is a margin factor
       
-      camera.position.set(0, 0, distance);
+      // Check if camera is perspective (has fov property)
+      if (camera instanceof THREE.PerspectiveCamera) {
+        const fov = camera.fov * (Math.PI / 180);
+        const distance = (maxDim / 2) / Math.tan(fov / 2) * 3; // Increased margin factor to 3 for initial zoom out
+        camera.position.set(0, 0, distance);
+      } else {
+        // For orthographic cameras
+        camera.position.set(0, 0, maxDim * 3);
+      }
+      
       camera.lookAt(0, 0, 0);
     }
   }, [geometry, camera]);
@@ -39,10 +58,16 @@ function Model() {
   if (!geometry) return null;
 
   return (
-    <mesh ref={meshRef}>
-      <primitive object={geometry} attach="geometry" />
-      <meshStandardMaterial color="#8294c4" roughness={0.5} metalness={0.5} />
-    </mesh>
+    <group ref={groupRef} scale={[modelScale, modelScale, modelScale]}>
+      <mesh ref={meshRef}>
+        <primitive object={geometry} attach="geometry" />
+        <meshStandardMaterial 
+          color={modelColor} 
+          roughness={modelRoughness} 
+          metalness={modelMetalness} 
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -61,7 +86,7 @@ export default function STLViewer() {
     <Canvas ref={canvasRef}>
       <color attach="background" args={["#f8f9fa"]} />
       
-      <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+      <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={40} />
       
       <ambientLight intensity={0.5} />
       <spotLight 
@@ -98,8 +123,9 @@ export default function STLViewer() {
         enableDamping 
         dampingFactor={0.1} 
         rotateSpeed={0.5}
-        minDistance={1}
-        maxDistance={20}
+        minDistance={0.5}
+        maxDistance={100}
+        zoomSpeed={1.5}
       />
     </Canvas>
   );

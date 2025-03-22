@@ -11,6 +11,8 @@ import {
   RotateCcw, 
   Video, 
   Download,
+  ZoomIn,
+  ZoomOut,
   Loader2
 } from "lucide-react";
 import VideoRecorder from "./VideoRecorder";
@@ -23,6 +25,8 @@ export default function ControlPanel() {
     setAutoRotate,
     rotationSpeed, 
     setRotationSpeed,
+    modelScale,
+    setModelScale,
     isRecording,
     stlFileName
   } = useSTLStore();
@@ -37,8 +41,10 @@ export default function ControlPanel() {
       </div>
       
       <Tabs defaultValue="animation" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="animation">Animation</TabsTrigger>
+          <TabsTrigger value="camera">View</TabsTrigger>
+          <TabsTrigger value="material">Material</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
         
@@ -110,6 +116,81 @@ export default function ControlPanel() {
               <RotateCcw className="mr-1 h-4 w-4" /> Reset View
             </Button>
           </div>
+        </TabsContent>
+
+        <TabsContent value="camera" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="scale">Model Size</Label>
+              <span className="text-xs text-muted-foreground">
+                {modelScale.toFixed(2)}x
+              </span>
+            </div>
+            <Slider
+              id="scale"
+              min={0.1}
+              max={2}
+              step={0.05}
+              value={[modelScale]}
+              onValueChange={(value) => setModelScale(value[0])}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Smaller</span>
+              <span>Larger</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                setModelScale(Math.max(0.1, modelScale - 0.1));
+              }}
+            >
+              <ZoomOut className="mr-1 h-4 w-4" /> Smaller
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                setModelScale(Math.min(2, modelScale + 0.1));
+              }}
+            >
+              <ZoomIn className="mr-1 h-4 w-4" /> Larger
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-xs text-muted-foreground mb-2">
+              Camera Navigation Tips:
+            </p>
+            <ul className="text-xs text-muted-foreground space-y-1 pl-4 list-disc">
+              <li>Rotate: Click and drag</li>
+              <li>Zoom: Mouse wheel or pinch</li>
+              <li>Pan: Right-click and drag or three-finger drag</li>
+            </ul>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2"
+            onClick={() => {
+              setModelScale(1.0);
+              const element = document.querySelector('canvas');
+              if (element) {
+                const event = new KeyboardEvent('keydown', { key: 'r' });
+                element.dispatchEvent(event);
+                toast.success("View reset");
+              }
+            }}
+          >
+            <RotateCcw className="mr-1 h-4 w-4" /> Reset All View Settings
+          </Button>
         </TabsContent>
         
         <TabsContent value="export" className="space-y-4 mt-4">
