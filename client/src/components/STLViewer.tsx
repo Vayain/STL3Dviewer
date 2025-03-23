@@ -147,7 +147,8 @@ function Model() {
         <meshStandardMaterial 
           color={modelColor} 
           roughness={modelRoughness} 
-          metalness={modelMetalness} 
+          metalness={modelMetalness}
+          flatShading={modelSmoothness < 0.5}
         />
       </mesh>
     </group>
