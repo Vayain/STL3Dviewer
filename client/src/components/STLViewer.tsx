@@ -41,14 +41,23 @@ function Model() {
       if (meshRef.current) {
         const { axis, amount } = event.detail;
         
-        // Rotate around the specified axis
+        // Create rotation matrix for more precise control
+        const rotationMatrix = new THREE.Matrix4();
+        
+        // Apply rotation based on the axis
         if (axis === 0) {
           meshRef.current.rotation.x += amount;
+          rotationMatrix.makeRotationX(amount);
         } else if (axis === 1) {
           meshRef.current.rotation.y += amount;
+          rotationMatrix.makeRotationY(amount);
         } else if (axis === 2) {
           meshRef.current.rotation.z += amount;
+          rotationMatrix.makeRotationZ(amount);
         }
+        
+        // Apply the rotation matrix
+        meshRef.current.updateMatrix();
         
         // Log the rotation for debugging
         console.log(`Rotated ${axis} axis by ${amount} radians`);
@@ -64,10 +73,16 @@ function Model() {
     };
   }, []);
   
-  // Auto-rotate the model when enabled (only Y-axis)
+  // Model animation and auto-rotation
   useFrame(() => {
-    if (meshRef.current && (autoRotate || isRecording)) {
-      meshRef.current.rotation.y += rotationSpeed * 0.01;
+    if (meshRef.current) {
+      // Auto-rotate when enabled (only Y-axis)
+      if (autoRotate || isRecording) {
+        meshRef.current.rotation.y += rotationSpeed * 0.01;
+      }
+      
+      // Apply any damping or animation effects here if needed
+      meshRef.current.updateMatrix();
     }
   });
   
@@ -297,13 +312,15 @@ export default function STLViewer() {
         <OrbitControls 
           enableDamping 
           dampingFactor={0.1}
-          rotateSpeed={0.8}
+          rotateSpeed={1.0}
           minDistance={0.5}
           maxDistance={100}
           zoomSpeed={1.5}
           enableRotate={true}
           enablePan={true}
-          panSpeed={1.0}
+          panSpeed={1.2}
+          maxPolarAngle={Math.PI} // Allow full rotation
+          screenSpacePanning={true} // Improves panning experience
         />
         
         {/* Add Blender-like camera controls */}
