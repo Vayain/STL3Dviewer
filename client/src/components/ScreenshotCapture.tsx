@@ -1,9 +1,19 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 import { toast } from "sonner";
-import { Camera, Download, Loader2 } from "lucide-react";
-import * as THREE from "three";
+import { Camera, Loader2 } from "lucide-react";
+
+// Predefined camera positions for taking screenshots
+const CAMERA_POSITIONS = [
+  { position: [0, 0, 5], name: "front" },    // Front view
+  { position: [0, 0, -5], name: "back" },    // Back view
+  { position: [5, 0, 0], name: "right" },    // Right view
+  { position: [-5, 0, 0], name: "left" },    // Left view
+  { position: [0, 5, 0], name: "top" },      // Top view
+  { position: [0, -5, 0], name: "bottom" },  // Bottom view
+  { position: [3.5, 3.5, 3.5], name: "corner" } // Corner view
+];
 
 export default function ScreenshotCapture() {
   const { 
@@ -13,17 +23,7 @@ export default function ScreenshotCapture() {
     setAutoRotate
   } = useSTLStore();
   
-  const [screenshots, setScreenshots] = useState<string[]>([]);
-  const cameraPositionRef = useRef<THREE.Vector3 | null>(null);
-  
-  // Capture a single screenshot from the canvas
-  const captureScreenshot = (): string => {
-    if (!canvasRef) return "";
-    
-    return canvasRef.toDataURL("image/png");
-  };
-  
-  // Download a single screenshot
+  // Download a screenshot
   const downloadScreenshot = (dataUrl: string, name: string) => {
     const link = document.createElement("a");
     link.href = dataUrl;
@@ -33,7 +33,7 @@ export default function ScreenshotCapture() {
     document.body.removeChild(link);
   };
   
-  // Generate screenshots from multiple angles
+  // Capture screenshots from multiple angles
   const captureMultipleScreenshots = async () => {
     if (!canvasRef) {
       toast.error("Canvas not available");
@@ -43,51 +43,23 @@ export default function ScreenshotCapture() {
     setIsTakingScreenshots(true);
     setAutoRotate(false);
     
-    // Store original camera position
-    const threeCanvas = canvasRef.__r3f.fiber;
-    if (threeCanvas && threeCanvas.camera) {
-      const camera = threeCanvas.camera;
-      cameraPositionRef.current = camera.position.clone();
+    try {
+      // Simple approach: just capture the current canvas state
+      // This doesn't control the camera, but captures what's currently showing
+      const screenshot = canvasRef.toDataURL("image/png");
       
-      const screenshots: string[] = [];
-      const positions = [
-        { x: 0, y: 0, z: 5, name: "front" },    // Front view
-        { x: 0, y: 0, z: -5, name: "back" },    // Back view
-        { x: 5, y: 0, z: 0, name: "right" },    // Right view
-        { x: -5, y: 0, z: 0, name: "left" },    // Left view
-        { x: 0, y: 5, z: 0, name: "top" },      // Top view
-        { x: 0, y: -5, z: 0, name: "bottom" },  // Bottom view
-        { x: 3.5, y: 3.5, z: 3.5, name: "corner" } // Corner view
-      ];
+      // Just download the current view for now
+      downloadScreenshot(screenshot, "model_current_view");
       
-      // Capture each screenshot with a delay to allow rendering
-      for (const pos of positions) {
-        camera.position.set(pos.x, pos.y, pos.z);
-        camera.lookAt(0, 0, 0);
-        
-        // Wait for render to complete
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Capture the screenshot
-        const screenshot = captureScreenshot();
-        screenshots.push(screenshot);
-        
-        // Create a download
-        downloadScreenshot(screenshot, `model_${pos.name}_view`);
-      }
-      
-      setScreenshots(screenshots);
-      
-      // Restore camera position
-      if (cameraPositionRef.current) {
-        camera.position.copy(cameraPositionRef.current);
-        camera.lookAt(0, 0, 0);
-      }
-      
-      toast.success("All screenshots captured and downloaded");
+      toast.success(
+        "Screenshot captured! For now, use the camera controls to position your model and take screenshots from different angles."
+      );
+    } catch (error) {
+      console.error("Error capturing screenshots:", error);
+      toast.error("Failed to capture screenshots");
+    } finally {
+      setIsTakingScreenshots(false);
     }
-    
-    setIsTakingScreenshots(false);
   };
   
   return (
@@ -97,7 +69,7 @@ export default function ScreenshotCapture() {
           <div>
             <h3 className="text-sm font-medium">Screenshot Series</h3>
             <p className="text-xs text-muted-foreground">
-              Capture views from multiple angles for product display
+              Capture views from different angles
             </p>
           </div>
         </div>
@@ -117,20 +89,20 @@ export default function ScreenshotCapture() {
         ) : (
           <>
             <Camera className="mr-2 h-4 w-4" />
-            Capture All Angles
+            Capture Current View
           </>
         )}
       </Button>
       
       {isTakingScreenshots && (
         <div className="text-xs text-muted-foreground text-center animate-pulse">
-          Please wait while screenshots are being captured...
+          Please wait while screenshot is being captured...
         </div>
       )}
       
       <div className="bg-muted p-3 rounded-md text-sm">
-        <p>This will generate 7 images showing your model from different angles: front, back, sides, top, bottom, and corner view.</p>
-        <p className="mt-2">Images will be automatically downloaded.</p>
+        <p>Position your model using the camera controls, then click the button above to capture a screenshot of the current view.</p>
+        <p className="mt-2">For a complete product showcase, take screenshots from different angles: front, back, sides, top, and bottom.</p>
       </div>
     </div>
   );

@@ -371,32 +371,45 @@ export default function ControlPanel() {
         </TabsContent>
         
         <TabsContent value="export" className="space-y-4 mt-4">
-          <VideoRecorder />
-          
-          {isRecording && (
-            <div className="flex items-center justify-center space-x-2 p-4 bg-muted rounded-md animate-pulse">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <p className="text-sm font-medium">Recording...</p>
-            </div>
-          )}
-          
           <div className="space-y-2">
             <Label>Export Options</Label>
             <p className="text-xs text-muted-foreground">
-              Create a video showcase of your 3D model rotating
+              Create videos and screenshots of your 3D model
             </p>
           </div>
           
-          <div className="bg-muted p-3 rounded-md">
-            <p className="text-sm">
-              Click the Record button to capture your model's rotation. The model will automatically
-              rotate while recording.
-            </p>
-          </div>
+          <Tabs defaultValue="video">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="video">Video</TabsTrigger>
+              <TabsTrigger value="screenshot">Screenshots</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="video" className="pt-4">
+              <VideoRecorder />
+              
+              {isRecording && (
+                <div className="flex items-center justify-center space-x-2 p-4 bg-muted rounded-md animate-pulse mt-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <p className="text-sm font-medium">Recording...</p>
+                </div>
+              )}
+              
+              <div className="bg-muted p-3 rounded-md mt-4">
+                <p className="text-sm">
+                  Click the Record button to capture your model's rotation. The model will automatically
+                  rotate while recording.
+                </p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="screenshot" className="pt-4">
+              <ScreenshotCapture />
+            </TabsContent>
+          </Tabs>
           
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mt-2">
             <Button
-              disabled={isRecording}
+              disabled={isRecording || isTakingScreenshots}
               onClick={() => {
                 if (activeTab === "export") {
                   setActiveTab("animation");
