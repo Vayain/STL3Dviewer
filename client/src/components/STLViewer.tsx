@@ -5,6 +5,13 @@ import * as THREE from "three";
 import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 
+// Erweitern der Window-Schnittstelle um resetCameraView
+declare global {
+  interface Window {
+    resetCameraView?: () => void;
+  }
+}
+
 // Component for the 3D model from STL
 function Model() {
   const { 
@@ -30,7 +37,35 @@ function Model() {
   });
 
   // Initialize camera position and fit model to view
-  const { camera } = useThree();
+  const { camera, scene } = useThree();
+  const initialCameraPosition = useRef<{ position: THREE.Vector3, target: THREE.Vector3 } | null>(null);
+  
+  // Store the reset view function in a ref that we can call from outside
+  const resetCameraRef = useRef((resetTarget = true) => {
+    if (!initialCameraPosition.current) return;
+    
+    const { position, target } = initialCameraPosition.current;
+    camera.position.copy(position);
+    
+    if (resetTarget && camera instanceof THREE.PerspectiveCamera) {
+      camera.lookAt(target);
+    }
+  });
+  
+  // Make the reset function available to the store
+  useEffect(() => {
+    // Register the reset view function with the store
+    const resetView = () => {
+      resetCameraRef.current();
+    };
+    
+    // Add to the global store so we can call it from UI
+    window.resetCameraView = resetView;
+    
+    return () => {
+      delete window.resetCameraView;
+    };
+  }, []);
   
   useEffect(() => {
     if (geometry && meshRef.current) {
@@ -52,9 +87,20 @@ function Model() {
         camera.position.set(0, 0, maxDim * 3);
       }
       
-      camera.lookAt(0, 0, 0);
+      // Target the center of the model
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      camera.lookAt(center);
+      
+      // Store initial camera state for reset
+      initialCameraPosition.current = {
+        position: camera.position.clone(),
+        target: center.clone()
+      };
+      
+      console.log("Initial camera position set:", camera.position.toArray());
     }
-  }, [geometry, camera]);
+  }, [geometry, camera, scene]);
 
   if (!geometry) return null;
 

@@ -123,11 +123,11 @@ export default function ControlPanel() {
               size="sm"
               className="flex-1"
               onClick={() => {
-                const element = document.querySelector('canvas');
-                if (element) {
-                  const event = new KeyboardEvent('keydown', { key: 'r' });
-                  element.dispatchEvent(event);
-                  toast.success("Camera reset");
+                if (window.resetCameraView) {
+                  window.resetCameraView();
+                  toast.success("View reset to default position");
+                } else {
+                  toast.error("Reset view function not available");
                 }
               }}
             >
@@ -273,11 +273,11 @@ export default function ControlPanel() {
               setShowGrid(true);
               setShowShadow(true);
               setBackgroundImage(null);
-              const element = document.querySelector('canvas');
-              if (element) {
-                const event = new KeyboardEvent('keydown', { key: 'r' });
-                element.dispatchEvent(event);
-                toast.success("View reset");
+              if (window.resetCameraView) {
+                window.resetCameraView();
+                toast.success("View and settings reset");
+              } else {
+                toast.error("Reset view function not available");
               }
             }}
           >
