@@ -59,7 +59,7 @@ export const useSTLStore = create<STLState>((set, get) => ({
   modelColor: "#8294c4",
   modelMetalness: 0.2,
   modelRoughness: 0.8,
-  modelSmoothness: 0,
+  modelSmoothness: 0.5,
   modelPosition: [0, 0, 0],
   showGrid: false,
   showShadow: false,

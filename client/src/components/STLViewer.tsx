@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 import CameraControls from "./CameraControls";
+import CameraGizmo from "./CameraGizmo";
 
 // Erweitern der Window-Schnittstelle um resetCameraView und setCameraAngle
 declare global {
@@ -39,6 +40,26 @@ function Model() {
       meshRef.current.rotation.y += rotationSpeed * 0.01;
     }
   });
+  
+  // Handle smoothness changes
+  useEffect(() => {
+    if (meshRef.current && meshRef.current.material) {
+      // Log the change for debugging
+      console.log(`Applied smoothness: ${modelSmoothness}, flatShading: ${modelSmoothness < 0.5}`);
+      
+      // Force material update
+      const material = meshRef.current.material as THREE.MeshStandardMaterial;
+      material.flatShading = modelSmoothness < 0.5;
+      material.needsUpdate = true;
+      
+      // For very smooth models, we can recompute normals
+      if (geometry && modelSmoothness > 0.8) {
+        const geom = meshRef.current.geometry.clone();
+        geom.computeVertexNormals();
+        meshRef.current.geometry = geom;
+      }
+    }
+  }, [geometry, modelSmoothness]);
 
   // Initialize camera position and fit model to view
   const { camera, scene } = useThree();
@@ -250,6 +271,9 @@ export default function STLViewer() {
           maxDistance={100}
           zoomSpeed={1.5}
         />
+        
+        {/* Add Blender-like camera controls */}
+        <CameraGizmo />
       </Canvas>
     </div>
   );
