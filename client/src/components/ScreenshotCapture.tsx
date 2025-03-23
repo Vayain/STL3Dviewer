@@ -6,15 +6,15 @@ import { Camera, Loader2, Download, TrashIcon, CameraIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Predefined camera positions for taking screenshots
+// Predefined camera positions for taking screenshots with normalized vectors
 const CAMERA_POSITIONS = [
-  { position: [0, 0, 5], name: "front", label: "Front View" },    // Front view
-  { position: [0, 0, -5], name: "back", label: "Back View" },    // Back view
-  { position: [5, 0, 0], name: "right", label: "Right View" },    // Right view
-  { position: [-5, 0, 0], name: "left", label: "Left View" },    // Left view
-  { position: [0, 5, 0], name: "top", label: "Top View" },      // Top view
-  { position: [0, -5, 0], name: "bottom", label: "Bottom View" },  // Bottom view
-  { position: [3.5, 3.5, 3.5], name: "corner", label: "Corner View" } // Corner view
+  { position: [0, 0, 1], name: "front", label: "Front View" },     // Front view (Z+)
+  { position: [0, 0, -1], name: "back", label: "Back View" },     // Back view (Z-)
+  { position: [1, 0, 0], name: "right", label: "Right View" },    // Right view (X+)
+  { position: [-1, 0, 0], name: "left", label: "Left View" },     // Left view (X-)
+  { position: [0, 1, 0], name: "top", label: "Top View" },       // Top view (Y+)
+  { position: [0, -1, 0], name: "bottom", label: "Bottom View" }, // Bottom view (Y-)
+  { position: [0.578, 0.578, 0.578], name: "corner", label: "Corner View" } // Corner view, normalized
 ];
 
 export default function ScreenshotCapture() {
@@ -114,50 +114,76 @@ export default function ScreenshotCapture() {
     }
   };
   
-  // Capture screenshots from multiple angles - placeholder for now
-  // In a real implementation, this would manipulate the camera through the Three.js scene
+  // Capture screenshots from multiple angles using the global setCameraAngle function
   const captureMultipleScreenshots = async () => {
     setIsTakingScreenshots(true);
     setAutoRotate(false);
     
     try {
-      // In a real implementation, we would rotate the camera or model to different positions
-      // For now, we'll just take multiple screenshots of the current view with different names
       const timestamp = new Date().getTime();
+      const positions = CAMERA_POSITIONS.slice(0, 4); // Front, Back, Right, Left views
+      const capturedScreenshots: {url: string, name: string, label: string}[] = [];
       
-      // Take a screenshot of the current view to simulate multi-angle capability
-      const screenshot = await captureCanvasScreenshot();
+      // Store current view to restore later
+      let savedScreenshot = null;
       
-      // Add screenshots for each predefined position (using the same image for demo)
-      const positions = CAMERA_POSITIONS.slice(0, 4); // Just use first 4 for demo
-      
-      // Process each position
-      for (let i = 0; i < positions.length; i++) {
-        const pos = positions[i];
-        const screenshotName = `model_${pos.name}_${timestamp}`;
-        
-        // Add to screenshots array
-        setScreenshots(prev => [...prev, {
-          url: screenshot, // In a real implementation, each would be a different view
-          name: screenshotName,
-          label: pos.label
-        }]);
-        
-        // Download the screenshot
-        downloadScreenshot(screenshot, screenshotName);
-        
-        // Wait a bit between screenshots
-        if (i < positions.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+      if (window.setCameraAngle) {
+        // Process each position
+        for (let i = 0; i < positions.length; i++) {
+          const pos = positions[i];
+          
+          // Set camera to this position
+          window.setCameraAngle(pos.position);
+          
+          // Allow time for the camera to move and scene to render
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Capture the view
+          const screenshot = await captureCanvasScreenshot();
+          const screenshotName = `model_${pos.name}_${timestamp}`;
+          
+          // Save first position for restoring
+          if (i === 0) {
+            savedScreenshot = screenshot;
+          }
+          
+          // Add to screenshots array
+          capturedScreenshots.push({
+            url: screenshot,
+            name: screenshotName,
+            label: pos.label
+          });
+          
+          // Download the screenshot
+          downloadScreenshot(screenshot, screenshotName);
+          
+          // Wait a bit between camera movements
+          if (i < positions.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
         }
+        
+        // Reset camera to front view
+        window.setCameraAngle([0, 0, 1]);
+        
+        // Add all screenshots to state at once for better performance
+        setScreenshots(prev => [...prev, ...capturedScreenshots]);
+        
+        toast.success(`Captured ${positions.length} screenshots from different angles!`);
+      } else {
+        // Fallback if setCameraAngle is not available
+        toast.error("Camera control not available. Please try again after refreshing.");
       }
-      
-      toast.success(`Captured ${positions.length} screenshots!`);
     } catch (error) {
       console.error("Error capturing screenshots:", error);
       toast.error(`Failed to capture screenshots: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsTakingScreenshots(false);
+      
+      // Reset camera position in case of error
+      if (window.resetCameraView) {
+        window.resetCameraView();
+      }
     }
   };
   

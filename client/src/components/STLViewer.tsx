@@ -4,11 +4,13 @@ import { OrbitControls, PerspectiveCamera, Center, Environment, Grid } from "@re
 import * as THREE from "three";
 import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { useSTLStore } from "../lib/stores/useSTLStore";
+import CameraControls from "./CameraControls";
 
-// Erweitern der Window-Schnittstelle um resetCameraView
+// Erweitern der Window-Schnittstelle um resetCameraView und setCameraAngle
 declare global {
   interface Window {
     resetCameraView?: () => void;
+    setCameraAngle?: (position: number[]) => void;
   }
 }
 
@@ -52,20 +54,41 @@ function Model() {
     }
   });
   
-  // Make the reset function available to the store
+  // Make the reset and setCameraAngle functions available globally
   useEffect(() => {
-    // Register the reset view function with the store
+    // Register the reset view function
     const resetView = () => {
       resetCameraRef.current();
     };
     
-    // Add to the global store so we can call it from UI
+    // Function to set camera to a specific angle
+    const setCameraAngle = (position: number[]) => {
+      if (!initialCameraPosition.current) return;
+      
+      const [x, y, z] = position;
+      const { target } = initialCameraPosition.current;
+      
+      // Calculate distance based on initial camera position
+      const distance = initialCameraPosition.current.position.distanceTo(target);
+      const direction = new THREE.Vector3(x, y, z).normalize();
+      
+      // Set new camera position based on the normalized direction and the original distance
+      const newPosition = direction.multiplyScalar(distance);
+      camera.position.copy(newPosition);
+      camera.lookAt(target);
+      
+      console.log("Camera angle set to:", position, "at distance:", distance);
+    };
+    
+    // Add to the global window object so we can call from UI
     window.resetCameraView = resetView;
+    window.setCameraAngle = setCameraAngle;
     
     return () => {
       delete window.resetCameraView;
+      delete window.setCameraAngle;
     };
-  }, []);
+  }, [camera]);
   
   useEffect(() => {
     if (geometry && meshRef.current) {
@@ -145,76 +168,79 @@ export default function STLViewer() {
     new THREE.TextureLoader().load(backgroundImage) : null;
 
   return (
-    <Canvas 
-      ref={canvasRef} 
-      shadows={showShadow}
-      gl={{ preserveDrawingBuffer: true }}
-    >
-      {backgroundImage ? (
-        <mesh position={[0, 0, -10]}>
-          <planeGeometry args={[50, 50]} />
-          <meshBasicMaterial map={backgroundTexture} transparent opacity={0.2} />
-        </mesh>
-      ) : (
-        <color attach="background" args={["#f8f9fa"]} />
-      )}
-      
-      <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={40} />
-      
-      <ambientLight intensity={0.5} />
-      <spotLight 
-        position={[10, 10, 10]} 
-        angle={0.3} 
-        penumbra={1} 
-        intensity={1} 
-        castShadow={showShadow}
-      />
-      <spotLight 
-        position={[-10, 10, -10]} 
-        angle={0.3} 
-        penumbra={1} 
-        intensity={0.5} 
-        castShadow={showShadow}
-      />
-      
-      <Center>
-        <Model />
-      </Center>
-      
-      {showGrid && (
-        <Grid
-          args={[10, 10]}
-          cellSize={1}
-          cellThickness={0.5}
-          cellColor="#a0a0a0"
-          position={[0, -1.5, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          receiveShadow={showShadow}
+    <div className="relative w-full h-full">
+      <CameraControls />
+      <Canvas 
+        ref={canvasRef} 
+        shadows={showShadow}
+        gl={{ preserveDrawingBuffer: true }}
+      >
+        {backgroundImage ? (
+          <mesh position={[0, 0, -10]}>
+            <planeGeometry args={[50, 50]} />
+            <meshBasicMaterial map={backgroundTexture} transparent opacity={0.2} />
+          </mesh>
+        ) : (
+          <color attach="background" args={["#f8f9fa"]} />
+        )}
+        
+        <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={40} />
+        
+        <ambientLight intensity={0.5} />
+        <spotLight 
+          position={[10, 10, 10]} 
+          angle={0.3} 
+          penumbra={1} 
+          intensity={1} 
+          castShadow={showShadow}
         />
-      )}
-      
-      {/* Add a shadow-receiving plane when grid is off but shadows are on */}
-      {!showGrid && showShadow && (
-        <mesh 
-          rotation={[-Math.PI / 2, 0, 0]} 
-          position={[0, -1.5, 0]} 
-          receiveShadow
-        >
-          <planeGeometry args={[30, 30]} />
-          <shadowMaterial transparent opacity={0.2} />
-        </mesh>
-      )}
-      
-      <Environment preset="studio" />
-      
-      <OrbitControls 
-        enableDamping 
-        dampingFactor={0.1} 
-        rotateSpeed={0.5}
-        minDistance={0.5}
-        maxDistance={100}
-        zoomSpeed={1.5}
-      />
-    </Canvas>
+        <spotLight 
+          position={[-10, 10, -10]} 
+          angle={0.3} 
+          penumbra={1} 
+          intensity={0.5} 
+          castShadow={showShadow}
+        />
+        
+        <Center>
+          <Model />
+        </Center>
+        
+        {showGrid && (
+          <Grid
+            args={[10, 10]}
+            cellSize={1}
+            cellThickness={0.5}
+            cellColor="#a0a0a0"
+            position={[0, -1.5, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow={showShadow}
+          />
+        )}
+        
+        {/* Add a shadow-receiving plane when grid is off but shadows are on */}
+        {!showGrid && showShadow && (
+          <mesh 
+            rotation={[-Math.PI / 2, 0, 0]} 
+            position={[0, -1.5, 0]} 
+            receiveShadow
+          >
+            <planeGeometry args={[30, 30]} />
+            <shadowMaterial transparent opacity={0.2} />
+          </mesh>
+        )}
+        
+        <Environment preset="studio" />
+        
+        <OrbitControls 
+          enableDamping 
+          dampingFactor={0.1} 
+          rotateSpeed={0.5}
+          minDistance={0.5}
+          maxDistance={100}
+          zoomSpeed={1.5}
+        />
+      </Canvas>
+    </div>
   );
 }
