@@ -14,7 +14,7 @@ const CAMERA_POSITIONS = [
   { position: [-1, 0, 0], name: "left", label: "Left View" },     // Left view (X-)
   { position: [0, 1, 0], name: "top", label: "Top View" },       // Top view (Y+)
   { position: [0, -1, 0], name: "bottom", label: "Bottom View" }, // Bottom view (Y-)
-  { position: [0.578, 0.578, 0.578], name: "corner", label: "Corner View" } // Corner view, normalized
+  { position: [0.577, 0.577, 0.577], name: "isometric", label: "Isometric View" } // Isometric view (equal angles)
 ];
 
 export default function ScreenshotCapture() {
@@ -121,7 +121,7 @@ export default function ScreenshotCapture() {
     
     try {
       const timestamp = new Date().getTime();
-      const positions = CAMERA_POSITIONS.slice(0, 4); // Front, Back, Right, Left views
+      const positions = [...CAMERA_POSITIONS.slice(0, 6), CAMERA_POSITIONS[6]]; // Front, Back, Right, Left, Top, Bottom, Isometric
       const capturedScreenshots: {url: string, name: string, label: string}[] = [];
       
       // Store current view to restore later
@@ -274,8 +274,8 @@ export default function ScreenshotCapture() {
               )}
             </Button>
             
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {CAMERA_POSITIONS.slice(0, 4).map((pos, index) => (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {CAMERA_POSITIONS.slice(0, 6).map((pos, index) => (
                 <div key={index} className="bg-muted rounded-md p-2 text-center">
                   <div className="text-xs font-medium">{pos.label}</div>
                 </div>

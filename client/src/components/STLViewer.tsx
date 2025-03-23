@@ -68,16 +68,23 @@ function Model() {
       const [x, y, z] = position;
       const { target } = initialCameraPosition.current;
       
+      // Normalize input position vector if not already normalized
+      const length = Math.sqrt(x*x + y*y + z*z);
+      const normalizedDirection = new THREE.Vector3(
+        length !== 0 ? x / length : 0,
+        length !== 0 ? y / length : 0,
+        length !== 0 ? z / length : 0
+      );
+      
       // Calculate distance based on initial camera position
       const distance = initialCameraPosition.current.position.distanceTo(target);
-      const direction = new THREE.Vector3(x, y, z).normalize();
       
       // Set new camera position based on the normalized direction and the original distance
-      const newPosition = direction.multiplyScalar(distance);
+      const newPosition = normalizedDirection.clone().multiplyScalar(distance);
       camera.position.copy(newPosition);
       camera.lookAt(target);
       
-      console.log("Camera angle set to:", position, "at distance:", distance);
+      console.log("Camera angle set to:", normalizedDirection.toArray(), "at distance:", distance);
     };
     
     // Add to the global window object so we can call from UI
