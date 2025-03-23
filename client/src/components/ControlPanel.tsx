@@ -36,6 +36,10 @@ export default function ControlPanel() {
     setModelMetalness,
     modelRoughness,
     setModelRoughness,
+    modelSmoothness,
+    setModelSmoothness,
+    modelPosition,
+    setModelPosition,
     showGrid,
     setShowGrid,
     showShadow,
@@ -351,10 +355,32 @@ export default function ControlPanel() {
             </div>
           </div>
 
+          <div className="space-y-2 mt-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="smoothness">Smoothness</Label>
+              <span className="text-xs text-muted-foreground">
+                {modelSmoothness.toFixed(2)}
+              </span>
+            </div>
+            <Slider
+              id="smoothness"
+              min={0}
+              max={1}
+              step={0.05}
+              value={[modelSmoothness]}
+              onValueChange={(value) => setModelSmoothness(value[0])}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Faceted</span>
+              <span>Smooth</span>
+            </div>
+          </div>
+
           <div className="bg-muted p-3 rounded-md mt-4">
             <p className="text-sm">
               Adjust material properties to change how light interacts with your model. 
-              Metalness affects reflectivity, while roughness controls surface texture.
+              Metalness affects reflectivity, roughness controls surface texture, and smoothness refines the model's appearance.
             </p>
           </div>
 
@@ -366,6 +392,7 @@ export default function ControlPanel() {
               setModelColor("#8294c4");
               setModelMetalness(0.5);
               setModelRoughness(0.5);
+              setModelSmoothness(0.5);
               toast.success("Material reset to default");
             }}
           >

@@ -25,6 +25,8 @@ function Model() {
     modelColor,
     modelMetalness,
     modelRoughness,
+    modelSmoothness,
+    modelPosition,
     showShadow
   } = useSTLStore();
   

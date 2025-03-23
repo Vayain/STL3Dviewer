@@ -16,6 +16,8 @@ interface STLState {
   modelColor: string;
   modelMetalness: number;
   modelRoughness: number;
+  modelSmoothness: number;
+  modelPosition: [number, number, number];
   showGrid: boolean;
   showShadow: boolean;
   backgroundImage: string | null;
@@ -32,6 +34,8 @@ interface STLState {
   setModelColor: (color: string) => void;
   setModelMetalness: (metalness: number) => void;
   setModelRoughness: (roughness: number) => void;
+  setModelSmoothness: (smoothness: number) => void;
+  setModelPosition: (position: [number, number, number]) => void;
   setShowGrid: (show: boolean) => void;
   setShowShadow: (show: boolean) => void;
   setBackgroundImage: (imageUrl: string | null) => void;
@@ -55,6 +59,8 @@ export const useSTLStore = create<STLState>((set, get) => ({
   modelColor: "#8294c4",
   modelMetalness: 0.2,
   modelRoughness: 0.8,
+  modelSmoothness: 0,
+  modelPosition: [0, 0, 0],
   showGrid: false,
   showShadow: false,
   backgroundImage: null,
@@ -83,6 +89,10 @@ export const useSTLStore = create<STLState>((set, get) => ({
   setModelMetalness: (metalness) => set({ modelMetalness: metalness }),
   
   setModelRoughness: (roughness) => set({ modelRoughness: roughness }),
+  
+  setModelSmoothness: (smoothness) => set({ modelSmoothness: smoothness }),
+  
+  setModelPosition: (position) => set({ modelPosition: position }),
   
   setShowGrid: (show) => set({ showGrid: show }),
   
