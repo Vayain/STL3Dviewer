@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import * as THREE from "three";
 
+type ScreenshotFunction = (() => string) | null;
+
 interface STLState {
   stlFile: File | null;
   stlFileName: string | null;
@@ -18,6 +20,7 @@ interface STLState {
   showShadow: boolean;
   backgroundImage: string | null;
   isTakingScreenshots: boolean;
+  screenshotFunc: ScreenshotFunction;
   
   // Actions
   setSTLFile: (file: File, geometry: THREE.BufferGeometry) => void;
@@ -34,10 +37,12 @@ interface STLState {
   setBackgroundImage: (imageUrl: string | null) => void;
   setIsRecording: (isRecording: boolean) => void;
   setIsTakingScreenshots: (isTaking: boolean) => void;
+  setScreenshotFunc: (func: ScreenshotFunction) => void;
+  takeScreenshot: () => string | null;
   resetSTL: () => void;
 }
 
-export const useSTLStore = create<STLState>((set) => ({
+export const useSTLStore = create<STLState>((set, get) => ({
   stlFile: null,
   stlFileName: null,
   geometry: null,
@@ -54,6 +59,7 @@ export const useSTLStore = create<STLState>((set) => ({
   showShadow: true,
   backgroundImage: null,
   isTakingScreenshots: false,
+  screenshotFunc: null,
   
   setSTLFile: (file, geometry) => set({ 
     stlFile: file,
@@ -87,6 +93,16 @@ export const useSTLStore = create<STLState>((set) => ({
   setIsRecording: (isRecording) => set({ isRecording }),
   
   setIsTakingScreenshots: (isTaking) => set({ isTakingScreenshots: isTaking }),
+  
+  setScreenshotFunc: (func) => set({ screenshotFunc: func }),
+  
+  takeScreenshot: () => {
+    const { screenshotFunc } = get();
+    if (screenshotFunc) {
+      return screenshotFunc();
+    }
+    return null;
+  },
   
   resetSTL: () => set({
     stlFile: null,

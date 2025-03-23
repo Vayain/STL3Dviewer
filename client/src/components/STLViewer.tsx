@@ -76,13 +76,15 @@ function Model() {
   );
 }
 
+
+
 export default function STLViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { 
     setCanvasRef, 
     showGrid, 
     showShadow, 
-    backgroundImage 
+    backgroundImage
   } = useSTLStore();
   
   // Pass canvas to store for video recording

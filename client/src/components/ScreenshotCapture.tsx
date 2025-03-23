@@ -47,9 +47,45 @@ export default function ScreenshotCapture() {
     setAutoRotate(false);
     
     try {
-      // Simple approach: just capture the current canvas state
-      // This doesn't control the camera, but captures what's currently showing
+      // Debug info
+      console.log("Canvas size:", canvasRef.width, canvasRef.height);
+      
+      // Make sure canvas has content before capturing
+      // Force a render frame delay to ensure the canvas is properly rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Get the actual rendering context
+      const gl = canvasRef.getContext('webgl') || canvasRef.getContext('webgl2');
+      
+      if (!gl) {
+        throw new Error("WebGL context not available");
+      }
+      
+      // Preserve drawing buffer to ensure we can read pixels after render
+      // Note: This is just debugging info - we can't change canvas creation params here
+      console.log("Preserve drawing buffer:", gl.getContextAttributes()?.preserveDrawingBuffer);
+      
+      // Trigger a re-render if possible by touching the canvas
+      const event = new MouseEvent('mousemove', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: 0,
+        clientY: 0
+      });
+      canvasRef.dispatchEvent(event);
+      
+      // Small delay to ensure rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Capture from the canvas - must happen synchronously after render
       const screenshot = canvasRef.toDataURL("image/png");
+      console.log("Screenshot data length:", screenshot.length);
+      
+      // Verify the data URL starts correctly
+      if (!screenshot.startsWith('data:image/png;base64,')) {
+        throw new Error("Invalid screenshot data format");
+      }
       
       // Add to screenshots array with timestamp to make name unique
       const screenshotName = `model_view_${new Date().getTime()}`;
@@ -61,7 +97,7 @@ export default function ScreenshotCapture() {
       toast.success("Screenshot captured!");
     } catch (error) {
       console.error("Error capturing screenshots:", error);
-      toast.error("Failed to capture screenshots");
+      toast.error(`Failed to capture screenshot: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsTakingScreenshots(false);
     }
