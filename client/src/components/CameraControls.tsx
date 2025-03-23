@@ -4,10 +4,12 @@ import {
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, 
   RotateCw, RotateCcw, 
   ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  AlertCircle, PlusCircle, MinusCircle
+  AlertCircle, PlusCircle, MinusCircle,
+  CornerUpLeft
 } from 'lucide-react';
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ModelRotator from "./ModelRotator";
 
 const CameraControls: React.FC = () => {
   // X-axis rotation (pitch)
@@ -157,84 +159,28 @@ const CameraControls: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="advanced" className="mt-2">
-          {/* XY Plane Controls */}
-          <div className="bg-muted/50 p-1 rounded-md mb-2">
-            <div className="text-xs font-medium text-center mb-1">XY Plane</div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXYPositive}>
-                <ChevronUp className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXNegative}>
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateYPositive}>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXYNegative}>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </div>
+          {/* Model rotation controls */}
+          <div className="bg-muted/50 rounded-md mb-2">
+            <ModelRotator />
           </div>
           
-          {/* XZ Plane Controls */}
-          <div className="bg-muted/50 p-1 rounded-md mb-2">
-            <div className="text-xs font-medium text-center mb-1">XZ Plane</div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXZPositive}>
-                <ChevronUp className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXNegative}>
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateZPositive}>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateXZNegative}>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </div>
+          {/* Standard camera positions */}
+          <div className="grid grid-cols-2 gap-1 mb-2">
+            <Button variant="outline" size="sm" onClick={frontView}>Front</Button>
+            <Button variant="outline" size="sm" onClick={isometricView}>Isometric</Button>
           </div>
           
-          {/* YZ Plane Controls */}
-          <div className="bg-muted/50 p-1 rounded-md mb-2">
-            <div className="text-xs font-medium text-center mb-1">YZ Plane</div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateYZPositive}>
-                <ChevronUp className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateYNegative}>
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateZPositive}>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" className="w-8 h-8" onClick={rotateYZNegative}>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-          
-          <Button variant="secondary" size="sm" className="w-full" onClick={resetView}>
+          <Button variant="secondary" size="sm" className="w-full mb-2" onClick={resetView}>
             <RotateCcw className="mr-2 h-4 w-4" /> Reset View
           </Button>
+          
+          <div className="text-xs text-gray-500 mb-1 text-center">
+            <span className="font-semibold">Free Rotation Tip:</span><br />
+            Click and drag in canvas for camera rotation.<br />
+            Use axis rotation for precise model control.
+          </div>
         </TabsContent>
       </Tabs>
-      
-      <div className="text-xs text-center mt-1 text-gray-500">
-        Click and drag for free rotation
-      </div>
     </div>
   );
 };

@@ -4,9 +4,7 @@ import { RotateCw, RotateCcw } from 'lucide-react';
 import { useSTLStore } from '../lib/stores/useSTLStore';
 
 // Component to provide UI for precise 360-degree axis rotation
-export default function ModelRotator() {
-  const { modelPosition, setModelPosition } = useSTLStore();
-  
+export default function ModelRotator({ className = "" }: { className?: string }) {
   // Axis labels and colors
   const axes = [
     { name: 'X', color: '#ff3352' },
@@ -16,8 +14,6 @@ export default function ModelRotator() {
   
   // Function to rotate the model around a specific axis
   const rotateModel = (axis: string, clockwise: boolean) => {
-    // No need to query for the mesh element, we're using events to communicate with the Model component
-    
     // Determine which axis to rotate around
     let axisIndex = 0;
     if (axis === 'Y') axisIndex = 1;
@@ -36,30 +32,30 @@ export default function ModelRotator() {
   };
   
   return (
-    <div className="fixed bottom-4 right-4 bg-black/10 backdrop-blur-sm p-3 rounded-lg z-10 flex flex-col gap-3">
-      <h3 className="text-sm font-bold text-center mb-1">Axis Rotation</h3>
+    <div className={`p-2 ${className}`}>
+      <div className="text-xs font-medium text-center mb-2">Model Rotation</div>
       
       {axes.map((axis) => (
-        <div key={axis.name} className="flex items-center justify-between gap-2">
-          <span className="font-bold" style={{ color: axis.color }}>{axis.name}</span>
+        <div key={axis.name} className="flex items-center justify-between gap-1 mb-1">
+          <span className="font-medium text-xs" style={{ color: axis.color }}>{axis.name}</span>
           <div className="flex gap-1">
             <Button 
               size="sm" 
               variant="outline"
-              className="p-1 h-8 w-8"
+              className="p-0 h-7 w-7"
               onClick={() => rotateModel(axis.name, false)}
               title={`Rotate ${axis.name} axis counter-clockwise`}
             >
-              <RotateCcw className="h-5 w-5" />
+              <RotateCcw className="h-3 w-3" />
             </Button>
             <Button 
               size="sm" 
               variant="outline"
-              className="p-1 h-8 w-8"
+              className="p-0 h-7 w-7"
               onClick={() => rotateModel(axis.name, true)}
               title={`Rotate ${axis.name} axis clockwise`}
             >
-              <RotateCw className="h-5 w-5" />
+              <RotateCw className="h-3 w-3" />
             </Button>
           </div>
         </div>

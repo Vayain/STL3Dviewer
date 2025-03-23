@@ -191,7 +191,7 @@ function Model() {
     <group ref={groupRef} scale={[modelScale, modelScale, modelScale]}>
       <mesh 
         ref={meshRef} 
-        className="model-mesh"
+        // We can't use className in mesh, but we'll identify it through the ref
         castShadow={showShadow} 
         receiveShadow={showShadow}
       >
@@ -232,7 +232,6 @@ export default function STLViewer() {
   return (
     <div className="relative w-full h-full">
       <CameraControls />
-      <ModelRotator />
       <Canvas 
         ref={canvasRef} 
         shadows={showShadow}
@@ -297,11 +296,14 @@ export default function STLViewer() {
         
         <OrbitControls 
           enableDamping 
-          dampingFactor={0.1} 
-          rotateSpeed={0.5}
+          dampingFactor={0.1}
+          rotateSpeed={0.8}
           minDistance={0.5}
           maxDistance={100}
           zoomSpeed={1.5}
+          enableRotate={true}
+          enablePan={true}
+          panSpeed={1.0}
         />
         
         {/* Add Blender-like camera controls */}
