@@ -18,6 +18,7 @@ import {
   Palette
 } from "lucide-react";
 import VideoRecorder from "./VideoRecorder";
+import ScreenshotCapture from "./ScreenshotCapture";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 import { toast } from "sonner";
 
@@ -35,7 +36,15 @@ export default function ControlPanel() {
     setModelMetalness,
     modelRoughness,
     setModelRoughness,
+    showGrid,
+    setShowGrid,
+    showShadow,
+    setShowShadow,
+    backgroundImage,
+    setBackgroundImage,
     isRecording,
+    isTakingScreenshots,
+    setIsTakingScreenshots,
     stlFileName
   } = useSTLStore();
   
@@ -80,7 +89,7 @@ export default function ControlPanel() {
             </div>
             <Slider
               id="speed"
-              min={1}
+              min={0}
               max={10}
               step={1}
               value={[rotationSpeed]}
@@ -171,6 +180,75 @@ export default function ControlPanel() {
               <ZoomIn className="mr-1 h-4 w-4" /> Larger
             </Button>
           </div>
+          
+          <Separator className="my-4" />
+          
+          {/* Grid Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="showgrid">Show Grid</Label>
+              <p className="text-xs text-muted-foreground">
+                Display ground grid beneath model
+              </p>
+            </div>
+            <Switch
+              id="showgrid"
+              checked={showGrid}
+              onCheckedChange={setShowGrid}
+            />
+          </div>
+          
+          {/* Shadow Toggle */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="space-y-1">
+              <Label htmlFor="showshadow">Show Shadow</Label>
+              <p className="text-xs text-muted-foreground">
+                Display shadows cast by model
+              </p>
+            </div>
+            <Switch
+              id="showshadow"
+              checked={showShadow}
+              onCheckedChange={setShowShadow}
+            />
+          </div>
+          
+          {/* Background Image Upload */}
+          <div className="space-y-2 mt-4">
+            <Label htmlFor="background">Background Image</Label>
+            <div className="flex gap-2">
+              <Input
+                id="background"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setBackgroundImage(url);
+                    toast.success("Background image set");
+                  }
+                }}
+                className="text-xs"
+              />
+              {backgroundImage && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    setBackgroundImage(null);
+                    toast.success("Background image removed");
+                  }}
+                  className="h-10 w-10 flex-shrink-0"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Add a watermark or background image
+            </p>
+          </div>
 
           <div className="mt-4">
             <p className="text-xs text-muted-foreground mb-2">
@@ -189,6 +267,9 @@ export default function ControlPanel() {
             className="w-full mt-2"
             onClick={() => {
               setModelScale(1.0);
+              setShowGrid(true);
+              setShowShadow(true);
+              setBackgroundImage(null);
               const element = document.querySelector('canvas');
               if (element) {
                 const event = new KeyboardEvent('keydown', { key: 'r' });

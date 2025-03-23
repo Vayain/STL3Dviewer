@@ -14,6 +14,10 @@ interface STLState {
   modelColor: string;
   modelMetalness: number;
   modelRoughness: number;
+  showGrid: boolean;
+  showShadow: boolean;
+  backgroundImage: string | null;
+  isTakingScreenshots: boolean;
   
   // Actions
   setSTLFile: (file: File, geometry: THREE.BufferGeometry) => void;
@@ -25,7 +29,11 @@ interface STLState {
   setModelColor: (color: string) => void;
   setModelMetalness: (metalness: number) => void;
   setModelRoughness: (roughness: number) => void;
+  setShowGrid: (show: boolean) => void;
+  setShowShadow: (show: boolean) => void;
+  setBackgroundImage: (imageUrl: string | null) => void;
   setIsRecording: (isRecording: boolean) => void;
+  setIsTakingScreenshots: (isTaking: boolean) => void;
   resetSTL: () => void;
 }
 
@@ -42,6 +50,10 @@ export const useSTLStore = create<STLState>((set) => ({
   modelColor: "#8294c4",
   modelMetalness: 0.5,
   modelRoughness: 0.5,
+  showGrid: true,
+  showShadow: true,
+  backgroundImage: null,
+  isTakingScreenshots: false,
   
   setSTLFile: (file, geometry) => set({ 
     stlFile: file,
@@ -66,7 +78,15 @@ export const useSTLStore = create<STLState>((set) => ({
   
   setModelRoughness: (roughness) => set({ modelRoughness: roughness }),
   
+  setShowGrid: (show) => set({ showGrid: show }),
+  
+  setShowShadow: (show) => set({ showShadow: show }),
+  
+  setBackgroundImage: (imageUrl) => set({ backgroundImage: imageUrl }),
+  
   setIsRecording: (isRecording) => set({ isRecording }),
+  
+  setIsTakingScreenshots: (isTaking) => set({ isTakingScreenshots: isTaking }),
   
   resetSTL: () => set({
     stlFile: null,

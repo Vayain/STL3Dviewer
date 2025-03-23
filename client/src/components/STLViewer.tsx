@@ -15,7 +15,8 @@ function Model() {
     modelScale,
     modelColor,
     modelMetalness,
-    modelRoughness
+    modelRoughness,
+    showShadow
   } = useSTLStore();
   
   const meshRef = useRef<THREE.Mesh>(null);
@@ -59,7 +60,11 @@ function Model() {
 
   return (
     <group ref={groupRef} scale={[modelScale, modelScale, modelScale]}>
-      <mesh ref={meshRef}>
+      <mesh 
+        ref={meshRef} 
+        castShadow={showShadow} 
+        receiveShadow={showShadow}
+      >
         <primitive object={geometry} attach="geometry" />
         <meshStandardMaterial 
           color={modelColor} 
@@ -73,7 +78,12 @@ function Model() {
 
 export default function STLViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { setCanvasRef } = useSTLStore();
+  const { 
+    setCanvasRef, 
+    showGrid, 
+    showShadow, 
+    backgroundImage 
+  } = useSTLStore();
   
   // Pass canvas to store for video recording
   useEffect(() => {
@@ -82,9 +92,20 @@ export default function STLViewer() {
     }
   }, [canvasRef, setCanvasRef]);
 
+  // Create background texture if there is a background image
+  const backgroundTexture = backgroundImage ? 
+    new THREE.TextureLoader().load(backgroundImage) : null;
+
   return (
-    <Canvas ref={canvasRef}>
-      <color attach="background" args={["#f8f9fa"]} />
+    <Canvas ref={canvasRef} shadows={showShadow}>
+      {backgroundImage ? (
+        <mesh position={[0, 0, -10]}>
+          <planeGeometry args={[50, 50]} />
+          <meshBasicMaterial map={backgroundTexture} transparent opacity={0.2} />
+        </mesh>
+      ) : (
+        <color attach="background" args={["#f8f9fa"]} />
+      )}
       
       <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={40} />
       
@@ -94,28 +115,43 @@ export default function STLViewer() {
         angle={0.3} 
         penumbra={1} 
         intensity={1} 
-        castShadow 
+        castShadow={showShadow}
       />
       <spotLight 
         position={[-10, 10, -10]} 
         angle={0.3} 
         penumbra={1} 
         intensity={0.5} 
-        castShadow 
+        castShadow={showShadow}
       />
       
       <Center>
         <Model />
       </Center>
       
-      <Grid
-        args={[10, 10]}
-        cellSize={1}
-        cellThickness={0.5}
-        cellColor="#a0a0a0"
-        position={[0, -1.5, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      />
+      {showGrid && (
+        <Grid
+          args={[10, 10]}
+          cellSize={1}
+          cellThickness={0.5}
+          cellColor="#a0a0a0"
+          position={[0, -1.5, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow={showShadow}
+        />
+      )}
+      
+      {/* Add a shadow-receiving plane when grid is off but shadows are on */}
+      {!showGrid && showShadow && (
+        <mesh 
+          rotation={[-Math.PI / 2, 0, 0]} 
+          position={[0, -1.5, 0]} 
+          receiveShadow
+        >
+          <planeGeometry args={[30, 30]} />
+          <shadowMaterial transparent opacity={0.2} />
+        </mesh>
+      )}
       
       <Environment preset="studio" />
       
