@@ -77,6 +77,7 @@ export default function ControlPanel() {
               id="autorotate"
               checked={autoRotate}
               onCheckedChange={setAutoRotate}
+              className="data-[state=checked]:bg-gray-700 data-[state=checked]:text-white"
             />
           </div>
           
@@ -195,6 +196,7 @@ export default function ControlPanel() {
               id="showgrid"
               checked={showGrid}
               onCheckedChange={setShowGrid}
+              className="data-[state=checked]:bg-gray-700 data-[state=checked]:text-white"
             />
           </div>
           
@@ -210,6 +212,7 @@ export default function ControlPanel() {
               id="showshadow"
               checked={showShadow}
               onCheckedChange={setShowShadow}
+              className="data-[state=checked]:bg-gray-700 data-[state=checked]:text-white"
             />
           </div>
           
