@@ -6,6 +6,7 @@ import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 import CameraControls from "./CameraControls";
 import CameraGizmo from "./CameraGizmo";
+import ModelRotator from "./ModelRotator";
 
 // Erweitern der Window-Schnittstelle um resetCameraView und setCameraAngle
 declare global {
@@ -34,7 +35,36 @@ function Model() {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
-  // Auto-rotate the model when enabled
+  // Set up model rotation listeners for X, Y, Z axis rotation
+  useEffect(() => {
+    const handleRotation = (event: CustomEvent) => {
+      if (meshRef.current) {
+        const { axis, amount } = event.detail;
+        
+        // Rotate around the specified axis
+        if (axis === 0) {
+          meshRef.current.rotation.x += amount;
+        } else if (axis === 1) {
+          meshRef.current.rotation.y += amount;
+        } else if (axis === 2) {
+          meshRef.current.rotation.z += amount;
+        }
+        
+        // Log the rotation for debugging
+        console.log(`Rotated ${axis} axis by ${amount} radians`);
+      }
+    };
+    
+    // Add event listener
+    window.addEventListener('rotate-model', handleRotation as EventListener);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('rotate-model', handleRotation as EventListener);
+    };
+  }, []);
+  
+  // Auto-rotate the model when enabled (only Y-axis)
   useFrame(() => {
     if (meshRef.current && (autoRotate || isRecording)) {
       meshRef.current.rotation.y += rotationSpeed * 0.01;
@@ -161,6 +191,7 @@ function Model() {
     <group ref={groupRef} scale={[modelScale, modelScale, modelScale]}>
       <mesh 
         ref={meshRef} 
+        className="model-mesh"
         castShadow={showShadow} 
         receiveShadow={showShadow}
       >
@@ -201,6 +232,7 @@ export default function STLViewer() {
   return (
     <div className="relative w-full h-full">
       <CameraControls />
+      <ModelRotator />
       <Canvas 
         ref={canvasRef} 
         shadows={showShadow}
