@@ -99,7 +99,11 @@ export default function STLViewer() {
     new THREE.TextureLoader().load(backgroundImage) : null;
 
   return (
-    <Canvas ref={canvasRef} shadows={showShadow}>
+    <Canvas 
+      ref={canvasRef} 
+      shadows={showShadow}
+      gl={{ preserveDrawingBuffer: true }}
+    >
       {backgroundImage ? (
         <mesh position={[0, 0, -10]}>
           <planeGeometry args={[50, 50]} />
