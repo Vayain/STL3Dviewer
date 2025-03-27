@@ -24,6 +24,12 @@ interface STLState {
   isTakingScreenshots: boolean;
   screenshotFunc: ScreenshotFunction;
   
+  // Watermark properties
+  showWatermark: boolean;
+  watermarkOpacity: number;
+  watermarkPosition: string;
+  watermarkSize: number;
+  
   // Actions
   setSTLFile: (file: File, geometry: THREE.BufferGeometry) => void;
   setLoading: (loading: boolean) => void;
@@ -42,6 +48,10 @@ interface STLState {
   setIsRecording: (isRecording: boolean) => void;
   setIsTakingScreenshots: (isTaking: boolean) => void;
   setScreenshotFunc: (func: ScreenshotFunction) => void;
+  setShowWatermark: (show: boolean) => void;
+  setWatermarkOpacity: (opacity: number) => void;
+  setWatermarkPosition: (position: string) => void;
+  setWatermarkSize: (size: number) => void;
   takeScreenshot: () => string | null;
   resetSTL: () => void;
 }
@@ -66,6 +76,12 @@ export const useSTLStore = create<STLState>((set, get) => ({
   backgroundImage: null,
   isTakingScreenshots: false,
   screenshotFunc: null,
+  
+  // Watermark properties
+  showWatermark: false,
+  watermarkOpacity: 0.3,
+  watermarkPosition: "bottomright",
+  watermarkSize: 0.3,
   
   setSTLFile: (file, geometry) => set({ 
     stlFile: file,
@@ -105,6 +121,15 @@ export const useSTLStore = create<STLState>((set, get) => ({
   setIsTakingScreenshots: (isTaking) => set({ isTakingScreenshots: isTaking }),
   
   setScreenshotFunc: (func) => set({ screenshotFunc: func }),
+  
+  // Watermark actions
+  setShowWatermark: (show) => set({ showWatermark: show }),
+  
+  setWatermarkOpacity: (opacity) => set({ watermarkOpacity: opacity }),
+  
+  setWatermarkPosition: (position) => set({ watermarkPosition: position }),
+  
+  setWatermarkSize: (size) => set({ watermarkSize: size }),
   
   takeScreenshot: () => {
     const { screenshotFunc } = get();

@@ -243,6 +243,31 @@ export default function STLViewer() {
   // Create background texture if there is a background image
   const backgroundTexture = backgroundImage ? 
     new THREE.TextureLoader().load(backgroundImage) : null;
+    
+  // Get watermark properties from store
+  const { 
+    showWatermark, 
+    watermarkOpacity, 
+    watermarkPosition, 
+    watermarkSize 
+  } = useSTLStore();
+  
+  // Calculate watermark position based on setting
+  const getWatermarkPosition = () => {
+    const positions: Record<string, [number, number, number]> = {
+      topleft: [-5, 5, -5],
+      topcenter: [0, 5, -5],
+      topright: [5, 5, -5],
+      middleleft: [-5, 0, -5],
+      middlecenter: [0, 0, -5],
+      middleright: [5, 0, -5],
+      bottomleft: [-5, -5, -5],
+      bottomcenter: [0, -5, -5],
+      bottomright: [5, -5, -5]
+    };
+    
+    return positions[watermarkPosition] || [5, -5, -5]; // Default to bottom right
+  };
 
   return (
     <div className="relative w-full h-full">
@@ -252,13 +277,15 @@ export default function STLViewer() {
         shadows={showShadow}
         gl={{ preserveDrawingBuffer: true }}
       >
-        {backgroundImage ? (
-          <mesh position={[0, 0, -10]}>
-            <planeGeometry args={[50, 50]} />
-            <meshBasicMaterial map={backgroundTexture} transparent opacity={0.2} />
+        {/* Background color */}
+        <color attach="background" args={["#f8f9fa"]} />
+        
+        {/* Watermark */}
+        {backgroundImage && showWatermark && (
+          <mesh position={getWatermarkPosition()} scale={[watermarkSize * 5, watermarkSize * 5, 1]}>
+            <planeGeometry args={[1, 1]} />
+            <meshBasicMaterial map={backgroundTexture} transparent opacity={watermarkOpacity} depthTest={false} />
           </mesh>
-        ) : (
-          <color attach="background" args={["#f8f9fa"]} />
         )}
         
         <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={40} />

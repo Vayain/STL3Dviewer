@@ -15,10 +15,13 @@ import {
   ZoomIn,
   ZoomOut,
   Loader2,
-  Palette
+  Palette,
+  Stamp,
+  Image
 } from "lucide-react";
 import VideoRecorder from "./VideoRecorder";
 import ScreenshotCapture from "./ScreenshotCapture";
+import WatermarkManager from "./WatermarkManager";
 import { useSTLStore } from "../lib/stores/useSTLStore";
 import { toast } from "sonner";
 
@@ -62,10 +65,11 @@ export default function ControlPanel() {
       </div>
       
       <Tabs defaultValue="animation" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="animation">Animation</TabsTrigger>
           <TabsTrigger value="camera">View</TabsTrigger>
           <TabsTrigger value="material">Material</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
         
@@ -398,6 +402,28 @@ export default function ControlPanel() {
           >
             <RotateCcw className="mr-1 h-4 w-4" /> Reset Material
           </Button>
+        </TabsContent>
+        
+        <TabsContent value="branding" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Stamp className="h-5 w-5" />
+              <Label>Watermark Settings</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Add your brand logo or watermark to videos and screenshots
+            </p>
+          </div>
+          
+          <Separator className="my-4" />
+          
+          <WatermarkManager />
+          
+          <div className="bg-muted p-3 rounded-md mt-4">
+            <p className="text-sm">
+              Watermarks will appear in all exported videos and screenshots. Adjust positioning and opacity to ensure your brand is visible without obscuring the model.
+            </p>
+          </div>
         </TabsContent>
         
         <TabsContent value="export" className="space-y-4 mt-4">
