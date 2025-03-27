@@ -1,37 +1,34 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
 assignees: ''
 ---
 
-**Describe the bug**
+## Bug Description
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
+## Steps To Reproduce
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
+## Expected Behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+## Screenshots
 If applicable, add screenshots to help explain your problem.
 
-**Environment (please complete the following information):**
- - OS: [e.g. Windows, macOS, Linux]
- - Browser: [e.g. Chrome, Safari, Firefox]
- - Browser Version: [e.g. 91.0.4472.124]
- - Device: [e.g. Desktop, Mobile, Tablet]
+## Environment
+- Device: [e.g. Desktop, iPhone 13]
+- OS: [e.g. Windows 11, macOS Monterey, iOS 15]
+- Browser: [e.g. Chrome 98, Safari 15]
+- Application Version: [e.g. 1.0.0]
 
-**STL File Information (if applicable):**
-- File size: [e.g. 2MB]
-- Number of polygons (if known): [e.g. ~10,000]
-- STL format: [Binary/ASCII]
-
-**Additional context**
+## Additional Context
 Add any other context about the problem here.
+
+## Possible Solution
+If you have suggestions on how to fix the issue, please describe them here.
